@@ -3,11 +3,18 @@ class Keisan {
     constructor(rootElm) {
         this.rootElm = rootElm;
 
+        if (localStorage.getItem('score') === null) {
+            localStorage.setItem('score',0);
+        }
+        
         this.gameSetting = {
             level: null,
             intervalKey: null,
-            correct:0
+            correct:0,
+            highScore: Number(localStorage.getItem('score')),
+            newRecord:false
         };
+
     }
 
     //実行部
@@ -163,6 +170,7 @@ class Keisan {
                 <button class="titleBtn">始める</button>
                 <button class="HtPBtn miniBtn">遊び方</button>
             </div>
+            <p class="str" id="score">最高記録：${this.gameSetting.highScore}</p>
             `;
 
         const parentElm = document.createElement('div');
@@ -276,6 +284,7 @@ class Keisan {
     //スタート画面を表示、ボタンのクリックでdisplayCountDownを実行
     displayStart() {
         this.gameSetting.correct = 0;
+        this.gameSetting.newRecord = false;
         const levelStrs = Object.keys(this.levelData);
         this.gameSetting.level = levelStrs[0];
         const optionStrs = [];
@@ -399,6 +408,12 @@ class Keisan {
     
     // リザルト画面を表示 ボタンを押してタイトルへ
     displayResult() {
+        //正解数が最高正解数を超えていた場合new recordと表示し数値を更新する。
+        if (this.gameSetting.correct > this.gameSetting.highScore){
+            localStorage.setItem('score',this.gameSetting.correct);
+            this.gameSetting.highScore = this.gameSetting.correct;
+            this.gameSetting.newRecord = true;
+        }
         const html = `
         <div class="action">
             <p class="str">リザルト</p>
@@ -406,6 +421,10 @@ class Keisan {
                 ${this.gameSetting.resultRank}
             </p>
             <p class="str">正答数：${this.gameSetting.correct}</p>
+            ${this.gameSetting.newRecord
+                ? '<p class="str">NEW RECORD!</p>'
+                : ''
+            }
             <button class="endBtn">タイトルへ</button>
         </div>
         `;
